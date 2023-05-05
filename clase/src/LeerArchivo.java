@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
@@ -15,36 +16,52 @@ public class LeerArchivo {
         String archivo = "nacimientos.csv";
         String linea;
         Map<String, Integer> nacimientosPorDepartamento = new HashMap<>();
-        
+
+    
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese la fecha de inicio (YYYY-MM-DD): ");
+        String fechaInicio = scanner.nextLine();
+        System.out.print("Ingrese la fecha de fin (YYYY-MM-DD): ");
+        String fechaFin = scanner.nextLine();
+        System.out.print("Ingrese la edad de la madre (en años): ");
+        int edadMadre = scanner.nextInt();
+
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             while ((linea = br.readLine()) != null) {
                 String[] elementos = linea.split(",");
                 String departamento = elementos[0].trim();
-                if (nacimientosPorDepartamento.containsKey(departamento)) {
-                    nacimientosPorDepartamento.put(departamento, nacimientosPorDepartamento.get(departamento) + 1);
-                } else {
-                    nacimientosPorDepartamento.put(departamento, 1);
+                String fechaNacimiento = elementos[1].trim();
+                int edad = Integer.parseInt(elementos[2].trim());
+
+                if (fechaNacimiento.compareTo(fechaInicio) >= 0 &&
+                        fechaNacimiento.compareTo(fechaFin) <= 0 &&
+                        edad >= edadMadre) {
+                    if (nacimientosPorDepartamento.containsKey(departamento)) {
+                        nacimientosPorDepartamento.put(departamento, nacimientosPorDepartamento.get(departamento) + 1);
+                    } else {
+                        nacimientosPorDepartamento.put(departamento, 1);
+                    }
                 }
             }
-            
+
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
             for (String departamento : nacimientosPorDepartamento.keySet()) {
                 dataset.addValue(nacimientosPorDepartamento.get(departamento), "Nacimientos", departamento);
             }
-            
+
             JFreeChart chart = ChartFactory.createBarChart(
-                    "Nacimientos por Departamento", 
-                    "Departamento", 
-                    "Cantidad", 
-                    dataset, 
-                    PlotOrientation.VERTICAL, 
-                    false, 
-                    true, 
+                    "Nacimientos por Departamento",
+                    "Departamento",
+                    "Cantidad",
+                    dataset,
+                    PlotOrientation.VERTICAL,
+                    false,
+                    true,
                     false);
-            
+
             chart.setBackgroundPaint(Color.white);
             chart.getTitle().setPaint(Color.black);
-            
+
             ChartFrame frame = new ChartFrame("Gráfico", chart);
             frame.setVisible(true);
             frame.setSize(800, 600);
